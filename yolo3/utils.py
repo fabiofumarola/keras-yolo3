@@ -1,14 +1,58 @@
 """Miscellaneous utility functions."""
 from functools import reduce
 import colorsys
-from PIL import Image
+from timeit import default_timer as timer
+from PIL import Image, ImageFont, ImageDraw
 import numpy as np
 from matplotlib.colors import rgb_to_hsv, hsv_to_rgb
 
 
+def draw_results(image, boxes, scores, classes, class_names, colors):
+    start = timer()
+    font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
+                              size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
+    thickness = (image.size[0] + image.size[1]) // 300
+
+    for i, c in reversed(list(enumerate(classes))):
+        predicted_class = class_names[c]
+        box = boxes[i]
+        score = scores[i]
+
+        label = '{} {:.2f}'.format(predicted_class, score)
+        draw = ImageDraw.Draw(image)
+        label_size = draw.textsize(label, font)
+
+        # adjust the top, left, bottom and right positions for the box
+        top, left, bottom, right = box
+        top = max(0, np.floor(top + 0.5).astype('int32'))
+        left = max(0, np.floor(left + 0.5).astype('int32'))
+        bottom = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
+        right = min(image.size[0], np.floor(right + 0.5).astype('int32'))
+        print(label, (left, top), (right, bottom))
+
+        if top - label_size[1] >= 0:
+            text_origin = np.array([left, top - label_size[1]])
+        else:
+            text_origin = np.array([left, top + 1])
+
+        for i in range(thickness):
+            draw.rectangle(
+                [left + i, top + i, right - i, bottom - i],
+                outline=colors[c])
+        draw.rectangle(
+            [tuple(text_origin), tuple(text_origin + label_size)],
+            fill=colors[c])
+        draw.text(text_origin, label, fill=(0, 0, 0), font=font)
+        del draw
+
+    end = timer()
+    print(end - start)
+    return image
+
+
 def generate_colormap(nelems, scaled=True):
     # Generate colors for drawing bounding boxes.
-    hsv_tuples = [(x / len(nelems), 1., 1.) for x in range(nelems)]
+    hsv_tuples = [(x / nelems, 1., 1.) for x in range(nelems)]
     colors = [colorsys.hsv_to_rgb(*x) for x in hsv_tuples]
     if scaled:
         colors = [(int(x[0] * 255), int(x[1] * 255), int(x[2] * 255))

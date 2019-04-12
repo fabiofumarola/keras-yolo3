@@ -1,5 +1,5 @@
 import cv2
-from time import timer
+from timeit import default_timer as timer
 from PIL import Image
 import numpy as np
 

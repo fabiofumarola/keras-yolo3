@@ -10,12 +10,10 @@ import numpy as np
 from keras import backend as K
 from keras.models import load_model
 from keras.layers import Input
-from PIL import ImageFont, ImageDraw
 
 from yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
-from yolo3.utils import letterbox_image
+from yolo3.utils import letterbox_image, generate_colormap
 from keras.utils import multi_gpu_model
-import utils
 
 
 class YOLO(object):
@@ -48,6 +46,7 @@ class YOLO(object):
         # load the model
         self.__load_model()
 
+
     def __load_model(self):
         model_path = os.path.expanduser(self.model_path)
         assert model_path.endswith(
@@ -79,7 +78,7 @@ class YOLO(object):
 
         print('{} model, anchors, and classes loaded.'.format(model_path))
 
-        self.colors = utils.generate_colormap(len(self.class_names))
+        self.colors = generate_colormap(len(self.class_names))
         # Shuffle colors to decorrelate adjacent classes.
         np.random.shuffle(self.colors)
 
@@ -138,48 +137,6 @@ class YOLO(object):
         print('elapsed ', end - start)
 
         return out_boxes, out_scores, out_classes
-
-    def draw_results(self, image, boxes, scores, classes):
-        start = timer()
-        font = ImageFont.truetype(font='../font/FiraMono-Medium.otf',
-                                  size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
-        thickness = (image.size[0] + image.size[1]) // 300
-
-        for i, c in reversed(list(enumerate(classes))):
-            predicted_class = self.class_names[c]
-            box = boxes[i]
-            score = scores[i]
-
-            label = '{} {:.2f}'.format(predicted_class, score)
-            draw = ImageDraw.Draw(image)
-            label_size = draw.textsize(label, font)
-
-            # adjust the top, left, bottom and right positions for the box
-            top, left, bottom, right = box
-            top = max(0, np.floor(top + 0.5).astype('int32'))
-            left = max(0, np.floor(left + 0.5).astype('int32'))
-            bottom = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
-            right = min(image.size[0], np.floor(right + 0.5).astype('int32'))
-            print(label, (left, top), (right, bottom))
-
-            if top - label_size[1] >= 0:
-                text_origin = np.array([left, top - label_size[1]])
-            else:
-                text_origin = np.array([left, top + 1])
-
-            for i in range(thickness):
-                draw.rectangle(
-                    [left + i, top + i, right - i, bottom - i],
-                    outline=self.colors[c])
-            draw.rectangle(
-                [tuple(text_origin), tuple(text_origin + label_size)],
-                fill=self.colors[c])
-            draw.text(text_origin, label, fill=(0, 0, 0), font=font)
-            del draw
-
-        end = timer()
-        print(end - start)
-        return image
 
     def close_session(self):
         self.sess.close()
