@@ -8,6 +8,7 @@ import argparse
 import configparser
 import io
 import os
+from pathlib import Path
 from collections import defaultdict
 
 import numpy as np
@@ -20,21 +21,6 @@ from keras.models import Model
 from keras.regularizers import l2
 from keras.utils.vis_utils import plot_model as plot
 
-
-parser = argparse.ArgumentParser(description='Darknet To Keras Converter.')
-parser.add_argument('config_path', help='Path to Darknet cfg file.')
-parser.add_argument('weights_path', help='Path to Darknet weights file.')
-parser.add_argument('output_path', help='Path to output Keras model file.')
-parser.add_argument(
-    '-p',
-    '--plot_model',
-    help='Plot generated Keras model and save as image.',
-    action='store_true')
-parser.add_argument(
-    '-w',
-    '--weights_only',
-    help='Save as Keras weights file instead of model file.',
-    action='store_true')
 
 def unique_config_sections(config_file):
     """Convert all config sections to have unique names.
@@ -54,8 +40,9 @@ def unique_config_sections(config_file):
     output_stream.seek(0)
     return output_stream
 
-# %%
-def _main(args):
+
+def convert_model(args):
+
     config_path = os.path.expanduser(args.config_path)
     weights_path = os.path.expanduser(args.weights_path)
     assert config_path.endswith('.cfg'), '{} is not a .cfg file'.format(
@@ -66,6 +53,7 @@ def _main(args):
     output_path = os.path.expanduser(args.output_path)
     assert output_path.endswith(
         '.h5'), 'output path {} is not a .h5 file'.format(output_path)
+
     output_root = os.path.splitext(output_path)[0]
 
     # Load weights and config.
@@ -73,8 +61,9 @@ def _main(args):
     weights_file = open(weights_path, 'rb')
     major, minor, revision = np.ndarray(
         shape=(3, ), dtype='int32', buffer=weights_file.read(12))
-    if (major*10+minor)>=2 and major<1000 and minor<1000:
-        seen = np.ndarray(shape=(1,), dtype='int64', buffer=weights_file.read(8))
+    if (major*10+minor) >= 2 and major < 1000 and minor < 1000:
+        seen = np.ndarray(
+            shape=(1,), dtype='int64', buffer=weights_file.read(8))
     else:
         seen = np.ndarray(shape=(1,), dtype='int32', buffer=weights_file.read(4))
     print('Weights Header: ', major, minor, revision, seen)
@@ -93,6 +82,7 @@ def _main(args):
                          ) if 'net_0' in cfg_parser.sections() else 5e-4
     count = 0
     out_index = []
+    # load the model
     for section in cfg_parser.sections():
         print('Parsing section {}'.format(section))
         if section.startswith('convolutional'):
@@ -162,9 +152,9 @@ def _main(args):
                         activation, section))
 
             # Create Conv2D layer
-            if stride>1:
+            if stride > 1:
                 # Darknet uses left and top padding instead of 'same' mode
-                prev_layer = ZeroPadding2D(((1,0),(1,0)))(prev_layer)
+                prev_layer = ZeroPadding2D(((1, 0), (1, 0)))(prev_layer)
             conv_layer = (Conv2D(
                 filters, (size, size),
                 strides=(stride, stride),
@@ -235,9 +225,15 @@ def _main(args):
                 'Unsupported section header type: {}'.format(section))
 
     # Create and save model.
-    if len(out_index)==0: out_index.append(len(all_layers)-1)
-    model = Model(inputs=input_layer, outputs=[all_layers[i] for i in out_index])
+    if len(out_index) == 0:
+        out_index.append(len(all_layers) - 1)
+
+    model = Model(
+        inputs=input_layer,
+        outputs=[all_layers[i] for i in out_index]
+    )
     print(model.summary())
+
     if args.weights_only:
         model.save_weights('{}'.format(output_path))
         print('Saved Keras weights to {}'.format(output_path))
@@ -259,4 +255,19 @@ def _main(args):
 
 
 if __name__ == '__main__':
-    _main(parser.parse_args())
+    parser = argparse.ArgumentParser(description='Darknet To Keras Converter.')
+    parser.add_argument('config_path', help='Path to Darknet cfg file.')
+    parser.add_argument('weights_path', help='Path to Darknet weights file.')
+    parser.add_argument('output_path', help='Path to output Keras model file.')
+    parser.add_argument(
+        '-p',
+        '--plot_model',
+        help='Plot generated Keras model and save as image.',
+        action='store_true')
+    parser.add_argument(
+        '-w',
+        '--weights_only',
+        help='Save as Keras weights file instead of model file.',
+        action='store_true')
+
+    convert_model(parser.parse_args())
