@@ -3,6 +3,7 @@ from yolo3.yolo import YOLO
 from yolo3.video import detect_video
 from PIL import Image
 from yolo3 import utils
+from enum import Enum
 
 
 def detect_img(yolo):
@@ -20,6 +21,13 @@ def detect_img(yolo):
 
     yolo.close_session()
 
+
+class InputType(Enum):
+    image = 'image'
+    video = 'video'
+
+    def __str__(self):
+        return self.value
 
 if __name__ == '__main__':
     # class YOLO defines the default value, so suppress any default here
@@ -52,12 +60,10 @@ if __name__ == '__main__':
     )
 
     parser.add_argument(
-        '--image', default=False, action="store_true",
-        help='Image detection mode, will ignore all positional arguments'
+        '--input_type', type=InputType, choices=list(InputType),
+        help='the type of input to process: image or video'
     )
-    '''
-    Command line positional arguments -- for video detection mode
-    '''
+
     parser.add_argument(
         "--input", nargs='?', type=str, required=False, default='./path2your_video',
         help="Video input path"
@@ -70,16 +76,13 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.image:
+    if args.input_type == InputType.image:
         """
         Image detection mode, disregard any remaining command line arguments
         """
         print("Image detection mode")
-        if "input" in args:
-            print(" Ignoring remaining command line arguments: " +
-                  args.input + "," + args.output)
         detect_img(YOLO(**vars(args)))
-    elif "input" in args:
+    elif args.input_type == InputType.video:
         detect_video(YOLO(**vars(args)), args.input, args.output)
     else:
         print("Must specify at least video_input_path.  See usage with --help.")

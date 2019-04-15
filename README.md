@@ -22,33 +22,14 @@ python utils/convert.py yolov3.cfg yolov3.weights model_data/yolo.h5
 3. Run YOLO detection.
 
 ```
-python yolo_video.py [OPTIONS...] --image, for image detection mode, OR
-python yolo_video.py [video_path] [output_path (optional)]
+python yolo_predict.py [OPTIONS...] --input_type, for image detection mode, OR
+python yolo_predict.py --input_type video [video_path] [output_path (optional)]
 ```
 
-For Tiny YOLOv3, just do in a similar way, just specify model path and anchor path with `--model model_file` and `--anchors anchor_file`.
+For example if you want to train for an image run:
 
-### Usage
-
-Use --help to see usage of yolo_video.py:
 ```
-usage: yolo_video.py [-h] [--model MODEL] [--anchors ANCHORS]
-                     [--classes CLASSES] [--gpu_num GPU_NUM] [--image]
-                     [--input] [--output]
-
-positional arguments:
-  --input        Video input path
-  --output       Video output path
-
-optional arguments:
-  -h, --help         show this help message and exit
-  --model MODEL      path to model weight file, default model_data/yolo.h5
-  --anchors ANCHORS  path to anchor definitions, default
-                     model_data/yolo_anchors.txt
-  --classes CLASSES  path to class definitions, default
-                     model_data/coco_classes.txt
-  --gpu_num GPU_NUM  Number of GPU to use, default 1
-  --image            Image detection mode, will ignore all positional arguments
+python yolo_predict.py --input_type image
 ```
 ---
 
@@ -56,24 +37,44 @@ optional arguments:
 
 ## Training
 
-1. Generate your own annotation file and class names file.  
-    One row for one image;  
-    Row format: `image_file_path box1 box2 ... boxN`;  
-    Box format: `x_min,y_min,x_max,y_max,class_id` (no space).  
-    For VOC dataset, try `python voc_annotation.py`  
-    Here is an example:
+1. Generate your own annotation file and class names file.
+
+    - One row for one image;  
+    - Row format: `image_file_path box1 box2 ... boxN`;  
+    - Box format: `x_min,y_min,x_max,y_max,class_id` (no space).  
+
+    For VOC dataset, try `python preprocessing/voc_annotation.py`
+
+    Here there is an example of input file:
     ```
     path/to/img1.jpg 50,100,150,200,0 30,50,200,120,3
     path/to/img2.jpg 120,300,250,600,2
     ...
     ```
 
-2. Make sure you have converted the weights from yolo. The file model_data/yolo_weights.h5 is used to load pretrained weights.
+2. create a file that maps the `class_id`s to the class name and save it into the folder `model_data`
 
-3. Modify train.py and start training.  
-    `python train.py`  
-    Use your trained weights or checkpoint weights with command line option `--model model_file` when using yolo_video.py
-    Remember to modify class path or anchor path, with `--classes class_file` and `--anchors anchor_file`.
+3. Make sure you have converted the weights from yolo. The file model_data/yolo_weights.h5 is used to load pretrained weights.
+
+4. run the `train.py` script to train the model
+
+```
+Usage: train.py [OPTIONS]
+
+Options:
+  --annotation_path TEXT          the path of the file with the image paths
+                                  and annotations  [required]
+  --log_dir TEXT                  the directory for the results and log
+  --classes_path TEXT             the path with the classes for the model
+                                  [required]
+  --anchors_path TEXT             the path with the paths for the model
+                                  [required]
+  --weights_path TEXT             the path of the model to use as starting
+                                  point,
+                                  specify None to start from scratch
+                                  [required]
+  --mode [only_dense|fine_tuning]
+```
 
 If you want to use original pretrained weights for YOLOv3:  
     1. `wget https://pjreddie.com/media/files/darknet53.conv.74`  
