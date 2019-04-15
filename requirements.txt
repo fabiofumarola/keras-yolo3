@@ -1,0 +1,12 @@
+numpy
+pandas
+pillow
+keras
+matplotlib
+jupyter
+tensorflow
+tqdm
+opencv-python
+opencv-contrib-python
+tensorboard
+click

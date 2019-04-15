@@ -1,13 +1,9 @@
 # keras-yolo3
 
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
-
 ## Introduction
 
 A Keras implementation of YOLOv3 (Tensorflow backend) inspired by [qqwweee/keras-yolo3](https://github.com/qqwweee/keras-yolo3).
 
-
----
 
 ## Quick Start
 
@@ -26,8 +22,6 @@ python utils/convert.py yolov3.cfg yolov3.weights model_data/yolo.h5
 3. Run YOLO detection.
 
 ```
-
-
 python yolo_video.py [OPTIONS...] --image, for image detection mode, OR
 python yolo_video.py [video_path] [output_path (optional)]
 ```
@@ -35,6 +29,7 @@ python yolo_video.py [video_path] [output_path (optional)]
 For Tiny YOLOv3, just do in a similar way, just specify model path and anchor path with `--model model_file` and `--anchors anchor_file`.
 
 ### Usage
+
 Use --help to see usage of yolo_video.py:
 ```
 usage: yolo_video.py [-h] [--model MODEL] [--anchors ANCHORS]
@@ -73,8 +68,7 @@ optional arguments:
     ...
     ```
 
-2. Make sure you have run `python convert.py -w yolov3.cfg yolov3.weights model_data/yolo_weights.h5`  
-    The file model_data/yolo_weights.h5 is used to load pretrained weights.
+2. Make sure you have converted the weights from yolo. The file model_data/yolo_weights.h5 is used to load pretrained weights.
 
 3. Modify train.py and start training.  
     `python train.py`  
