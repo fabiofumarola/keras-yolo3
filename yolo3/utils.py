@@ -50,9 +50,10 @@ def draw_results(image, boxes, scores, classes, class_names, colors):
     return image
 
 
-def generate_colormap(nelems, scaled=True):
+def generate_colormap(nelems, scaled=True, bright=True):
     # Generate colors for drawing bounding boxes.
-    hsv_tuples = [(x / nelems, 1., 1.) for x in range(nelems)]
+    brightness = 1. if bright else .7
+    hsv_tuples = [(x / nelems, 1., brightness) for x in range(nelems)]
     colors = [colorsys.hsv_to_rgb(*x) for x in hsv_tuples]
     if scaled:
         colors = [(int(x[0] * 255), int(x[1] * 255), int(x[2] * 255))
