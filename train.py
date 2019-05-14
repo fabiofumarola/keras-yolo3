@@ -46,7 +46,7 @@ def _main(annotation_path, log_dir, classes_path, anchors_path, weights_path,
 
     logging = TensorBoard(log_dir=log_dir)
     checkpoint = ModelCheckpoint(log_dir + 'ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5',
-                                 monitor='val_loss', save_weights_only=True, save_best_only=True, period=3)
+                                 monitor='val_loss', save_weights_only=True, save_best_only=True, period=1)
     reduce_lr = ReduceLROnPlateau(
         monitor='val_loss', factor=0.1, patience=3, verbose=1)
     early_stopping = EarlyStopping(
@@ -76,8 +76,8 @@ def _main(annotation_path, log_dir, classes_path, anchors_path, weights_path,
                             validation_data=data_generator(
                                 lines[num_train:], batch_size, input_shape, anchors, num_classes),
                             validation_steps=max(1, num_val//batch_size),
-                            epochs=50,
-                            initial_epoch=0,
+                            epochs=10,
+                            initial_epoch=2,
                             callbacks=[logging, checkpoint])
         model.save_weights(log_dir + 'trained_weights_stage_1.h5')
 
@@ -98,8 +98,8 @@ def _main(annotation_path, log_dir, classes_path, anchors_path, weights_path,
                             validation_data=data_generator(
                                 lines[num_train:], batch_size, input_shape, anchors, num_classes),
                             validation_steps=max(1, num_val//batch_size),
-                            epochs=100,
-                            initial_epoch=50,
+                            epochs=15,
+                            initial_epoch=10,
                             callbacks=[logging, checkpoint, reduce_lr, early_stopping])
         model.save_weights(log_dir + 'trained_weights_final.h5')
 
