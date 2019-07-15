@@ -36,8 +36,8 @@ def _main(annotation_path, log_dir, classes_path, anchors_path, weights_path,
 
     input_shape = (512, 512)  # multiple of 32, hw
 
-    is_tiny_version = len(anchors) == 6  # default setting
-    if is_tiny_version:
+    # if the number of classes is lower than 6 creates a tiny model
+    if len(anchors) == 6:
         model = create_tiny_model(input_shape, anchors, num_classes,
                                   freeze_body=2, weights_path=weights_path)
     else:
@@ -45,8 +45,11 @@ def _main(annotation_path, log_dir, classes_path, anchors_path, weights_path,
                              freeze_body=2, weights_path=weights_path)  # make sure you know what you freeze
 
     logging = TensorBoard(log_dir=log_dir)
-    checkpoint = ModelCheckpoint(log_dir + 'ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5',
-                                 monitor='val_loss', save_weights_only=True, save_best_only=True, period=3)
+    checkpoint = ModelCheckpoint(
+        log_dir + 'ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5',
+        monitor='val_loss', save_weights_only=False,
+        save_best_only=False, period=1)
+
     reduce_lr = ReduceLROnPlateau(
         monitor='val_loss', factor=0.1, patience=3, verbose=1)
     early_stopping = EarlyStopping(
@@ -62,7 +65,7 @@ def _main(annotation_path, log_dir, classes_path, anchors_path, weights_path,
     if mode == 'only_dense' or mode == 'fine_tuning':
         # Train with frozen layers first, to get a stable loss.
         # Adjust num epochs to your dataset. This step is enough to obtain a not bad model.
-        model.compile(optimizer=Adam(lr=1e-3), loss={
+        model.compile(optimizer=Adam(), loss={
             # use custom yolo_loss Lambda layer.
             'yolo_loss': lambda y_true, y_pred: y_pred})
 
@@ -71,6 +74,7 @@ def _main(annotation_path, log_dir, classes_path, anchors_path, weights_path,
 
         print('Train on {} samples, val on {} samples, with batch size {}.'.format(
             num_train, num_val, batch_size))
+
         model.fit_generator(data_generator(lines[:num_train], batch_size, input_shape, anchors, num_classes),
                             steps_per_epoch=max(1, num_train//batch_size),
                             validation_data=data_generator(
@@ -195,6 +199,7 @@ def create_tiny_model(input_shape, anchors, num_classes, weights_path,
 
     return model
 
+
 def data_generator(annotation_lines, batch_size, input_shape, anchors, num_classes):
     '''data generator for fit_generator'''
     n = len(annotation_lines)
@@ -217,6 +222,7 @@ def data_generator(annotation_lines, batch_size, input_shape, anchors, num_class
         y_true = preprocess_true_boxes(
             box_data, input_shape, anchors, num_classes)
         yield [image_data, *y_true], np.zeros(batch_size)
+
 
 if __name__ == '__main__':
     _main()

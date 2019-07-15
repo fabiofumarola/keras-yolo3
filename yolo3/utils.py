@@ -3,13 +3,16 @@ from functools import reduce
 import colorsys
 from timeit import default_timer as timer
 from PIL import Image, ImageFont, ImageDraw
+
+
 import numpy as np
 from matplotlib.colors import rgb_to_hsv, hsv_to_rgb
 
 
-def draw_results(image, boxes, scores, classes, class_names, colors):
+def draw_results(image, boxes, scores, classes, class_names, colors,
+                 font='font/FiraMono-Medium.otf'):
     start = timer()
-    font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
+    font = ImageFont.truetype(font=font,
                               size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness = (image.size[0] + image.size[1]) // 300
 
@@ -91,6 +94,7 @@ def rand(a=0, b=1):
     return np.random.rand()*(b-a) + a
 
 
+# To remove
 def get_random_data(annotation_line, input_shape, random=True, max_boxes=20, jitter=.3, hue=.1, sat=1.5, val=1.5, proc_img=True):
     '''random preprocessing for real-time data augmentation'''
     line = annotation_line.split()

@@ -46,7 +46,6 @@ class YOLO(object):
         # load the model
         self.__load_model()
 
-
     def __load_model(self):
         model_path = os.path.expanduser(self.model_path)
         assert model_path.endswith(

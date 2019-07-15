@@ -8,7 +8,6 @@ import argparse
 import configparser
 import io
 import os
-from pathlib import Path
 from collections import defaultdict
 
 import numpy as np
@@ -42,7 +41,6 @@ def unique_config_sections(config_file):
 
 
 def convert_model(args):
-
     config_path = os.path.expanduser(args.config_path)
     weights_path = os.path.expanduser(args.weights_path)
     assert config_path.endswith('.cfg'), '{} is not a .cfg file'.format(
@@ -65,7 +63,8 @@ def convert_model(args):
         seen = np.ndarray(
             shape=(1,), dtype='int64', buffer=weights_file.read(8))
     else:
-        seen = np.ndarray(shape=(1,), dtype='int32', buffer=weights_file.read(4))
+        seen = np.ndarray(shape=(1,), dtype='int32',
+                          buffer=weights_file.read(4))
     print('Weights Header: ', major, minor, revision, seen)
 
     print('Parsing Darknet config.')
@@ -154,7 +153,7 @@ def convert_model(args):
             # Create Conv2D layer
             if stride > 1:
                 # Darknet uses left and top padding instead of 'same' mode
-                prev_layer = ZeroPadding2D(((1, 0), (1, 0)))(prev_layer)
+                baprev_layer = ZeroPadding2D(((1, 0), (1, 0)))(prev_layer)
             conv_layer = (Conv2D(
                 filters, (size, size),
                 strides=(stride, stride),

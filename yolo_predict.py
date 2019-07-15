@@ -29,6 +29,7 @@ class InputType(Enum):
     def __str__(self):
         return self.value
 
+
 if __name__ == '__main__':
     # class YOLO defines the default value, so suppress any default here
     parser = argparse.ArgumentParser(argument_default=argparse.SUPPRESS)

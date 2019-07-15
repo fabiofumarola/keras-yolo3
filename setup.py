@@ -22,5 +22,5 @@ setup(name='keras-yolo3',
       package_data={
           # If any package contains *.txt include them:
           '': ['font/*.oft'],
-          }
-)
+      }
+      )
