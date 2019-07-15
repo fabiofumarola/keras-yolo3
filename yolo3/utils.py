@@ -7,12 +7,18 @@ from PIL import Image, ImageFont, ImageDraw
 
 import numpy as np
 from matplotlib.colors import rgb_to_hsv, hsv_to_rgb
+import pkg_resources
 
 
 def draw_results(image, boxes, scores, classes, class_names, colors,
                  font='font/FiraMono-Medium.otf'):
     start = timer()
+<<<<<<< HEAD
     font = ImageFont.truetype(font=font,
+=======
+    font_file = pkg_resources.resource_filename(__name__, '../font/FiraMono-Medium.otf')
+    font = ImageFont.truetype(font=font_file,
+>>>>>>> c1ee24181c061f14dd3e993ca8a368875979fe11
                               size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness = (image.size[0] + image.size[1]) // 300
 
