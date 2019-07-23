@@ -45,16 +45,11 @@ def _main(annotation_path, log_dir, classes_path, anchors_path, weights_path,
                              freeze_body=2, weights_path=weights_path)  # make sure you know what you freeze
 
     logging = TensorBoard(log_dir=log_dir)
-<<<<<<< HEAD
     checkpoint = ModelCheckpoint(
         log_dir + 'ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5',
         monitor='val_loss', save_weights_only=False,
         save_best_only=False, period=1)
 
-=======
-    checkpoint = ModelCheckpoint(log_dir + 'ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5',
-                                 monitor='val_loss', save_weights_only=True, save_best_only=True, period=1)
->>>>>>> c1ee24181c061f14dd3e993ca8a368875979fe11
     reduce_lr = ReduceLROnPlateau(
         monitor='val_loss', factor=0.1, patience=3, verbose=1)
     early_stopping = EarlyStopping(
