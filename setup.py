@@ -8,7 +8,7 @@ setup(name='keras-yolo3',
       author='Fabio Fumarola',
       author_email='fabiofumarola@gmail.com',
       packages=find_packages(),
-      setup_requires=['lxml', 'numpy', 'Cython'],
+      setup_requires=['numpy', 'Cython'],
       install_requires=[
           'numpy',
           'pillow',

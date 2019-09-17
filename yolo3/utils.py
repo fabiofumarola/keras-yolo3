@@ -13,7 +13,7 @@ import pkg_resources
 def draw_results(image, boxes, scores, classes, class_names, colors,
                  font='font/FiraMono-Medium.otf'):
     start = timer()
-    font_file = pkg_resources.resource_filename(__name__, '../font/FiraMono-Medium.otf')
+    font_file = pkg_resources.resource_filename(__name__, './font/FiraMono-Medium.otf')
     font = ImageFont.truetype(font=font_file,
                               size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness = (image.size[0] + image.size[1]) // 300
