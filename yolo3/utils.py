@@ -14,8 +14,7 @@ def draw_results(image, boxes, scores, classes, class_names, colors,
                  font='font/FiraMono-Medium.otf'):
     start = timer()
     font_file = pkg_resources.resource_filename(__name__, './font/FiraMono-Medium.otf')
-    font = ImageFont.truetype(font=font_file,
-                              size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
+    font = ImageFont.truetype(font=font_file, size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness = (image.size[0] + image.size[1]) // 300
 
     for i, c in reversed(list(enumerate(classes))):
@@ -33,7 +32,7 @@ def draw_results(image, boxes, scores, classes, class_names, colors,
         left = max(0, np.floor(left + 0.5).astype('int32'))
         bottom = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
         right = min(image.size[0], np.floor(right + 0.5).astype('int32'))
-        print(label, (left, top), (right, bottom))
+        # print(label, (left, top), (right, bottom))
 
         if top - label_size[1] >= 0:
             text_origin = np.array([left, top - label_size[1]])
@@ -51,7 +50,7 @@ def draw_results(image, boxes, scores, classes, class_names, colors,
         del draw
 
     end = timer()
-    print(end - start)
+    # print(end - start)
     return image
 
 

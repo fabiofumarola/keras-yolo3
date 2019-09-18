@@ -119,7 +119,6 @@ class YOLO(object):
             boxed_image = letterbox_image(image, new_image_size)
         image_data = np.array(boxed_image, dtype='float32')
 
-        print(image_data.shape)
         image_data /= 255.
         image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
 
@@ -131,9 +130,9 @@ class YOLO(object):
                 K.learning_phase(): 0
             })
 
-        print('Found {} boxes for {}'.format(len(out_boxes), 'img'))
+        # print('Found {} boxes for {}'.format(len(out_boxes), 'img'))
         end = timer()
-        print('elapsed ', end - start)
+        # print('elapsed ', end - start)
 
         return out_boxes, out_scores, out_classes
 
